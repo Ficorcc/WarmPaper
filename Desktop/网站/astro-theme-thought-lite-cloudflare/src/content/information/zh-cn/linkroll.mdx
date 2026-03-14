@@ -1,0 +1,335 @@
+import Linkroll from "$components/Linkroll.astro";
+import Icon from "$components/Icon.svelte";
+
+export const links = [
+	{
+            "title": "荒野菲克",
+            "url": "https://ficor.net",
+            "type": "lifestyle",
+            "image": "https://ficor.net/favicon.ico",
+            "description": "在路上的思绪与脚印"
+        },
+        {
+            "title": "ACEVS",
+            "url": "https://acevs.com",
+            "type": "lifestyle",
+            "image": "https://cravatar.cn/avatar/ffc1ac2ecde17b2eb1caff3e94c119fdaea4dc1a947a08a3092b388bf9b454d0?s=32&d=identicon&r=g",
+            "description": "你坚持过什么事情？"
+        },
+        {
+            "title": "我是军爸",
+            "url": "https://me.xu19.com",
+            "type": "technology",
+            "image": "https://cravatar.cn/avatar/6e688e8773b5bd7dd15d86d97bbb3561",
+            "description": "记录单片机编程教学、生活与成长点滴"
+        },
+        {
+            "title": "瓦匠不舟",
+            "url": "https://airy.ink",
+            "type": "lifestyle",
+            "image": "https://cravatar.cn/avatar/060afceaea08afc40f8bcef99fe8542a",
+            "description": "大家都是倔强的人"
+        },
+        {
+            "title": "Yang's Blog",
+            "url": "https://knay.net",
+            "type": "lifestyle",
+            "image": "https://knay.net/avatar/yang.webp",
+            "description": "一亩三分地，记录生活，分享见闻"
+        },
+        {
+            "title": "旺东自留地",
+            "url": "https://wang618.cn",
+            "type": "lifestyle",
+            "image": "https://wang618.cn/logo.gif",
+            "description": "爱生活、爱摸鱼"
+        },
+        {
+            "title": "朱小呆",
+            "url": "https://zhujay.com",
+            "type": "lifestyle",
+            "image": "https://zhujay.com/images/webhead/wh2.png",
+            "description": "记录生活分享美好"
+        },
+        {
+            "title": "西风",
+            "url": "https://xifeng.net",
+            "type": "technology",
+            "image": "https://xifeng.net/images/avatar.svg",
+            "description": "源于热爱而去创造"
+        },
+        {
+            "title": "且听书吟",
+            "url": "https://yufan.me",
+            "type": "creative",
+            "image": "https://yufan.me/logo.svg",
+            "description": "诗与梦想的远方"
+        },
+        {
+            "title": "旅行漫记",
+            "url": "https://synyan.cn",
+            "type": "lifestyle",
+            "image": "https://synyan.cn/wp-content/themes/hera-develop/build/images/logo-s.png",
+            "description": "博物馆爱好者"
+        },
+        {
+            "title": "竹炉山房",
+            "url": "https://synyan.cn/t",
+            "type": "lifestyle",
+            "image": "https://synyan.cn/wp-content/themes/hera-develop/build/images/logo-s.png",
+            "description": "旅游点打卡员"
+        },
+        {
+            "title": "1900'Blog",
+            "url": "https://1900.live",
+            "type": "technology",
+            "image": "https://1900.live/logo.svg",
+            "description": "孤独的互联网冲浪大师"
+        },
+        {
+            "title": "老张博客",
+            "url": "https://laozhang.org",
+            "type": "lifestyle",
+            "image": "http://pic.laozhang.org/i/2023/04/07/642f72584c9a1.png",
+            "description": "生活琐记，技术折腾，乐在记录点滴与分享"
+        },
+        {
+            "title": "老刘博客",
+            "url": "https://iliu.org",
+            "type": "lifestyle",
+            "image": "https://iliu.org/img/favicon.ico",
+            "description": "热爱传统文化，验光师"
+        },
+        {
+            "title": "似水流年",
+            "url": "https://my1981.cn",
+            "type": "lifestyle",
+            "image": "https://weavatar.com/avatar/65cd1f408c1cc0949b34d3cd2acad0cb5a2b8c362ebf31ca9ee0dc9edcc63e81?s=100&r=g",
+            "description": "如花美眷，怎敌得过似水流年"
+        },
+        {
+            "title": "陈锐—响石潭",
+            "url": "https://www.chenrui.com",
+            "type": "lifestyle",
+            "image": "https://www.chenrui.com/zb_users/upload/2026/01/20260103005431176737287110422.png",
+            "description": "记录活着"
+        },
+        {
+            "title": "皇家园林",
+            "url": "https://hjyl.org",
+            "type": "lifestyle",
+            "image": "https://img.hjyl.org/uploads/2019/10/about-me.png",
+            "description": "欢迎来到皇家元林"
+        },
+        {
+            "title": "子夜松声",
+            "url": "https://xyzbz.cn",
+            "type": "technology",
+            "image": "https://cn.cravatar.com/avatar/120340d1df519f4e28613fe5d404b286?s=96&d=mp&r=g",
+            "description": "互联网爱好者"
+        },
+        {
+            "title": "Counting Stars💫",
+            "url": "https://hux.ink",
+            "type": "creative",
+            "image": "https://weavatar.com/avatar/d44fe4344f5b822fe55c92d04b874cbad2e22babd866c8a462d71afb0e86e9b5?d=letter&letter=%E8%90%BD",
+            "description": "欲买桂花同载酒，终不似，少年游"
+        },
+        {
+            "title": "老T博客",
+            "url": "https://lawtee.com",
+            "type": "expertise",
+            "image": "https://lawtee.com/images/favicon.png",
+            "description": "聚焦法律、科技和生活"
+        },
+        {
+            "title": "蒙需",
+            "url": "https://jiangcl.com",
+            "type": "expertise",
+            "image": "https://img.ficor.net/uploads/2025/11/6914480601006.webp",
+            "description": "律师"
+        },
+        {
+            "title": "破袜子",
+            "url": "https://pewae.com",
+            "type": "lifestyle",
+            "image": "https://pewae.com/wp-content/uploads/cropped-logo-20251231-1-270x270.png",
+            "description": "一个脱离不了低级趣味的人"
+        },
+        {
+            "title": "Keyle's Blog",
+            "url": "https://vrast.cn",
+            "type": "technology",
+            "image": "https://vrast.cn/favicon.ico",
+            "description": "记录一些偶尔冒出来转眼就会忘的灵感"
+        },
+        {
+            "title": "孤鬥",
+            "url": "https://d-d.design",
+            "type": "creative",
+            "image": "https://img.ficor.net/uploads/2025/11/6914480601006.webp",
+            "description": "做自己，不隨波逐流，不妥協"
+        },
+        {
+            "title": "木竹",
+            "url": "https://www.laomuzhu.cn",
+            "type": "creative",
+            "image": "https://www.laomuzhu.cn/img/touxiang.jpg",
+            "description": "在字里行间慢慢生长"
+        },
+        {
+            "title": "三十海河",
+            "url": "https://ihaihe.cn",
+            "type": "lifestyle",
+            "image": "https://ihaihe.cn/wp-content/uploads/2025/03/touxiang.png",
+            "description": "扩大自己的自由边界"
+        },
+        {
+            "title": "彬红茶日记",
+            "url": "https://note.redcha.cn",
+            "type": "lifestyle",
+            "image": "https://note.redcha.cn/upload/favicon-256x256.png",
+            "description": "生活原本沉闷，但跑起来就有风"
+        },
+        {
+            "title": "obaby@mars",
+            "url": "https://zhongxiaojie.com",
+            "type": "technology",
+            "image": "https://gg.lang.bi/avatar/d6ebc088df916bcc9e8b94a09f9b0f604e57be54b04bd520c6db2492740fc563?s=90&d=identicon&r=r",
+            "description": "黑客程序媛"
+        },
+        {
+            "title": "皮皮社",
+            "url": "https://www.pipishe.com",
+            "type": "lifestyle",
+            "image": "https://www.pipishe.com/tx.webp",
+            "description": "皮一下~很开心"
+        },
+        {
+            "title": "Jack's Space",
+            "url": "https://veryjack.com",
+            "type": "lifestyle",
+            "image": "https://veryjack.com/wp-content/uploads/2025/05/avatar_transparent.webp",
+            "description": "Everything happens for the best"
+        },
+        {
+            "title": "雅余",
+            "url": "https://yayu.net",
+            "type": "lifestyle",
+            "image": "https://yayu.net/wp-content/themes/yayu/assets/images/icon.png",
+            "description": "茶余饭后，闲情雅致"
+        },
+        {
+            "title": "灰常记忆",
+            "url": "https://bestcherish.com",
+            "type": "lifestyle",
+            "image": "https://bestcherish.com/image/favicon.svg",
+            "description": "记录生活 珍藏回忆"
+        },
+        {
+            "title": "韩情脉脉",
+            "url": "https://www.hxy.cc",
+            "type": "lifestyle",
+            "image": "https://www.hxy.cc/ico.png",
+            "description": "任何记录都是为了让以后有迹可循"
+        },
+        {
+            "title": "全局变量",
+            "url": "https://ilogs.cn",
+            "type": "lifestyle",
+            "image": "https://img.ficor.net/uploads/2025/11/6914480601006.webp",
+            "description": "记录生活中的平凡事"
+        },
+        {
+            "title": "黑桃三",
+            "url": "https://heitaosan.com",
+            "type": "lifestyle",
+            "image": "https://cn.cravatar.com/avatar/afcb21221b3785f83e89cb3c63ed4020",
+            "description": "有梦想的人，永远年轻"
+        },
+        {
+            "title": "缓坡日记",
+            "url": "https://amrx.me",
+            "type": "creative",
+            "image": "https://thirdqq.qlogo.cn/g?b=qq&nk=160860446&s=100",
+            "description": "网页中的诗意与宁静"
+        },
+        {
+            "title": "笔记星球",
+            "url": "https://note-star.cn",
+            "type": "resources",
+            "image": "https://note-star.cn/shortcut/logo.ico",
+            "description": "网页中的诗意与宁静"
+        },
+        {
+            "title": "燕渡寒潭",
+            "url": "https://hisherry.com",
+            "type": "creative",
+            "image": "https://cravatar.cn/avatar/c822f896a44080703a0845eb6a1ead02d72859e9e0273df32806698db9516512?s=42&r=g",
+            "description": "别为活命而败坏生存之根"
+        },
+        {
+            "title": "我心向阳",
+            "url": "https://www.hollowman.cn",
+            "type": "lifestyle",
+            "image": "https://www.hollowman.cn/favicon.png",
+            "description": "看清生活的真相后依然热爱生活"
+        },
+        {
+            "title": "莫比乌斯",
+            "url": "https://onojyun.com",
+            "type": "creative",
+            "image": "https://onojyun.com/wp-content/uploads/2024/03/a2d42-cropped-mobius_icon_black-edited.png",
+            "description": "写作，是一场自我悖驳的旅程"
+        },
+        {
+            "title": "梦幻辰风",
+            "url": "https://www.mhcf.net",
+            "type": "lifestyle",
+            "image": "https://www.mhcf.net/mhcf.ico",
+            "description": "壹个永恒的部落格"
+        },
+        {
+            "title": "品味苏州",
+            "url": "https://pwsz.com",
+            "type": "lifestyle",
+            "image": "https://pwsz.com/myimg/pwsz_logo.png",
+            "description": "生活在人间天堂"
+        },
+        {
+            "title": "徐建伟",
+            "url": "http://www.xulog.cn",
+            "type": "lifestyle",
+            "image": "",
+            "description": "记录生活 珍藏回忆"
+        },
+        {
+            "title": "崔话记",
+            "url": "https://cuixiping.com",
+            "type": "lifestyle",
+            "image": "https://cuixiping.com/logo-cat.svg",
+            "description": "向着理想的方向，爬一会儿，躺一会儿"
+        },
+        {
+            "title": "周天记",
+            "url": "https://zhoutian.com",
+            "type": "lifestyle",
+            "image": "https://bu.dusays.com/2023/01/29/63d5bf7fa0d2c.png",
+            "description": "记录生活里的小美好"
+        }
+];
+
+笔者将外站链接视为一种真实而有价值的推荐，收录自己**真正欣赏、常读或愿意分享**的站点。
+
+希望每一个链接都是**内容共鸣**与**价值认同**的体现，并能以此构建起一个充满个性与温度的站点网络。
+
+<Linkroll links={links} locale={props.locale} />
+
+若能得您垂青，还望链接小站：
+
+> <span style="color: #3498db; font-weight: bold;"><Icon name="lucide--lightbulb" size="1rem" style="color: #3498db;" /> 站点信息</span>\
+> 名称： 菲克的思绪 \
+> 地址： https://lawpan.cc \
+> 订阅： https://lawpan.cc/feed.xml \
+> 图标： https://lawpan.cc/favicon.ico \
+> 描述： 在路上的思绪与脚印

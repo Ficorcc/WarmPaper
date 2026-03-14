@@ -1,0 +1,47 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import config, { monolocale } from "$config";
+import Base from "$layouts/Base.astro";
+import Jotting from "$components/Jotting.svelte";
+import i18nit from "$i18n";
+
+export async function getStaticPaths() {
+	// Create path for each locale, omitting default locale from URL
+	return config.i18n.locales.map(locale => ({ params: { locale: config.i18n.defaultLocale === locale ? undefined : locale } }));
+}
+
+const { locale = config.i18n.defaultLocale } = Astro.params;
+
+const t = i18nit(locale);
+
+const guides = await getCollection("guide", guide => {
+	// Filter by publication status and locale
+	let published = !guide.data.draft;
+	let localed = monolocale || guide.id.split("/")[0] === locale;
+
+	return published && localed;
+});
+
+// Standardize note structure
+let list = guides.map(guide => ({
+	id: guide.id,
+	url: getRelativeLocaleUrl(locale, `/guide/${monolocale ? guide.id : guide.id.split("/").slice(1).join("/")}`),
+	data: {
+		title: guide.data.title,
+		timestamp: guide.data.timestamp,
+		tags: guide.data.tags,
+		sensitive: guide.data.sensitive,
+		top: guide.data.top
+	}
+}));
+
+// Extract all unique tags from the filtered notes
+const tags = Array.from(new Set(guides.flatMap(guide => guide.data.tags).filter((tag): tag is string => Boolean(tag)))).sort();
+---
+
+<Base title={t("navigation.guide")} {locale}>
+	<main class="flex flex-col grow">
+		<Jotting client:load {locale} jottings={list} {tags} />
+	</main>
+</Base>

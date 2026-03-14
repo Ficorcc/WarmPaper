@@ -1,0 +1,66 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - cloudflare
+  pull_request:
+    branches:
+      - cloudflare
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        run_install: false
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'pnpm'
+
+    - name: Export Environment Variables
+      run: echo '${{ secrets.ENV }}' > .env
+
+    - name: Create wrangler.toml from template
+      env:
+        PROJECT_NAME: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+        DATABASE_NAME: ${{ secrets.CLOUDFLARE_DATABASE_NAME }}
+        DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
+      run: |
+        envsubst < wrangler.example.toml > wrangler.toml
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Font Cache
+      uses: actions/cache@v3
+      with:
+        path: node_modules/.cache/og-fonts
+        key: og-fonts-cache-v1
+
+    - name: Build project
+      run: pnpm run build
+
+    - name: Run database migrations
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        command: d1 migrations apply DB --remote
+
+    - name: Deploy to Cloudflare Workers
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

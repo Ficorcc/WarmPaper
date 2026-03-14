@@ -1,0 +1,65 @@
+---
+import { getCollection, render } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import config, { monolocale } from "$config";
+import Time from "$utils/time";
+import Base from "$layouts/Base.astro";
+import i18nit from "$i18n";
+
+export async function getStaticPaths() {
+	// Create path for each locale, omitting default locale from URL
+	return config.i18n.locales.map(locale => ({ params: { locale: config.i18n.defaultLocale === locale ? undefined : locale } }));
+}
+
+const { locale = config.i18n.defaultLocale } = Astro.params;
+
+const t = i18nit(locale);
+
+// Get preface content for current locale, sorted by timestamp (latest first)
+const prefaces = (
+	await getCollection("preface", preface => {
+		// Handle single locale setup
+		if (monolocale) return true;
+
+		// Extract language and ID from file path structure
+		const [language, id] = preface.id.split("/");
+		preface.id = id;
+
+		// Filter by current locale
+		return language === locale;
+	})
+).sort((a, b) => b.data.timestamp.getTime() - a.data.timestamp.getTime());
+
+// Pre-render all preface content
+const prefacesWithContent = await Promise.all(
+	prefaces.map(async preface => {
+		const { Content } = await render(preface);
+		return { ...preface, Content };
+	})
+);
+---
+
+<Base title={t("navigation.preface")} {locale}>
+	<main class="flex flex-col gap-10 grow">
+		<h1 class="text-2xl font-serif">{t("navigation.preface")}</h1>
+		
+		{/* List all preface items */}
+		<div class="flex flex-col gap-8">
+			{prefacesWithContent.length > 0 ? (
+				prefacesWithContent.map(preface => (
+					<section class="flex flex-col">
+						<article class="markdown">
+							<preface.Content />
+						</article>
+						<time datetime={preface.data.timestamp.toISOString()} class="self-end my-2 text-sm text-secondary">
+							{Time.toLocaleDateString(preface.data.timestamp, locale)}
+						</time>
+						<hr class="border-border my-4" />
+					</section>
+				))
+			) : (
+				<p class="text-remark">{t("preface.empty")}</p>
+			)}
+		</div>
+	</main>
+</Base>

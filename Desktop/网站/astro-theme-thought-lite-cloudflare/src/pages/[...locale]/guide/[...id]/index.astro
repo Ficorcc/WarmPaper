@@ -1,0 +1,83 @@
+---
+import { getCollection, render } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import config, { monolocale } from "$config";
+import Base from "$layouts/Base.astro";
+import Tip from "$components/Tip.svelte";
+import Note from "$components/Note.svelte";
+import Sensitive from "$components/Sensitive.svelte";
+import TOC from "$components/TOC.astro";
+import Time from "$utils/time";
+import i18nit from "$i18n";
+
+export async function getStaticPaths() {
+	const guides = await getCollection("guide");
+
+	return guides.map(guide => {
+		const [locale, ...id] = guide.id.split("/");
+		return {
+			params: {
+				id: id,
+				locale: config.i18n.defaultLocale === locale ? undefined : locale
+			},
+			props: { guide }
+		};
+	});
+}
+
+const { guide } = Astro.props;
+const { locale = config.i18n.defaultLocale } = Astro.params;
+
+const t = i18nit(locale);
+
+// Render content if available, otherwise use empty object
+const { Content, headings } = await render(guide);
+---
+
+<Base
+	title={guide.data.title}
+	description={guide.data.description}
+	keywords={guide.data.tags}
+	image={getRelativeLocaleUrl(locale, `/guide/${monolocale ? guide.id : guide.id.split("/").slice(1).join("/")}/graph.png`)}
+	{locale}
+>
+	<main class="flex flex-col lg:flex-row gap-5 grow">
+		<article class="flex-1">
+			<h1 class="mb-3">{guide.data.title}</h1>
+
+			<div class="flex items-center gap-2 text-remark text-sm">
+				<time datetime={guide.data.timestamp.toISOString()}>
+					{Time.toLocaleDateString(guide.data.timestamp, locale)}
+				</time>
+
+				{guide.data.tags && guide.data.tags.length > 0 && (
+					<nav class="flex gap-2">
+						{guide.data.tags.map(tag => (
+							<a
+								href={`${getRelativeLocaleUrl(locale, "/guide")}?tag=${encodeURIComponent(tag)}`}
+								class="link"
+							>
+								#{tag}
+							</a>
+						))}
+					</nav>
+				)}
+			</div>
+
+			<div class="markdown mt-5">
+				<Content />
+			</div>
+
+			<div class="mt-5 flex flex-col items-end gap-2">
+				<Note {locale} type="guide" id={guide.id} />
+			</div>
+		</article>
+
+		<aside class="flex flex-col gap-5 lg:w-72 lg:sticky lg:top-5 lg:self-start">
+			<nav class="hidden lg:block">
+				<h2 class="text-sm font-medium mb-2">{t("article.toc")}</h2>
+				<TOC {headings} />
+			</nav>
+		</aside>
+	</main>
+</Base>
