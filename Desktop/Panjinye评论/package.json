@@ -1,0 +1,34 @@
+{
+  "name": "ficor",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A clean, elegant Astro blog theme designed for personal blogs",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
+    "@waline/client": "^3.13.0",
+    "artalk": "^2.9.1",
+    "astro": "^5.18.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "astro",
+    "astro-theme",
+    "blog",
+    "minimal",
+    "clean",
+    "responsive",
+    "dark-mode"
+  ],
+  "license": "MIT"
+}

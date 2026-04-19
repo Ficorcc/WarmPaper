@@ -1,0 +1,69 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const aboutPages = await getCollection('about', ({ data }) => !data.draft);
+const page = aboutPages[0];
+const { Content } = await page.render();
+const { title } = page.data;
+---
+
+<Layout title={title || '关于'}>
+  <div class="about-page">
+    <div class="container">
+      <h1 class="page-title">{title || '关于'}</h1>
+      <p class="page-description">了解更多关于我的故事</p>
+      
+      <div class="about-content">
+        <Content />
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .about-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+  
+  .page-description {
+    font-size: 14px;
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 40px;
+  }
+  
+  .about-content {
+    font-family: Georgia, serif;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--color-text);
+  }
+  
+  .about-content p {
+    margin-bottom: 20px;
+  }
+  
+  .about-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: var(--color-text);
+  }
+  
+  .about-content a {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+</style>

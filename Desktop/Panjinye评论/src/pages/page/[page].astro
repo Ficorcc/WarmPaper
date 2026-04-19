@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import RecentActivity from '../../components/RecentActivity.astro';
+import '../../styles/activity.css';
+import { SITE, POSTS_PER_PAGE } from '../../config.ts';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+  const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
+  
+  return Array.from({ length: totalPages }, (_, i) => ({
+    params: { page: String(i + 1) },
+  }));
+}
+
+const { page } = Astro.params;
+const currentPage = parseInt(page);
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE);
+
+const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+const endIndex = startIndex + POSTS_PER_PAGE;
+const posts = sortedPosts.slice(startIndex, endIndex);
+---
+
+<Layout description={SITE.description}>
+  <div class="hero">
+    <div class="container">
+      <div class="home-stats">
+        <RecentActivity />
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="posts-list">
+      {posts.map(post => (
+        <PostCard post={post} />
+      ))}
+    </div>
+    
+    <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/" />
+  </div>
+</Layout>

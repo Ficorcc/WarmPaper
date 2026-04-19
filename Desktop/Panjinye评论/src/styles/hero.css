@@ -1,0 +1,73 @@
+/* ========================================
+   Hero Styles
+   ======================================== */
+
+.hero {
+  text-align: center;
+  padding: var(--spacing-xxl) 0;
+  margin-bottom: calc(var(--spacing-xxl) * 0.5);
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border);
+}
+
+.social-link:hover {
+  color: var(--color-link);
+  border-color: var(--color-link);
+  transform: translateY(-2px);
+}
+
+.social-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+.home-stats {
+  max-width: 900px;
+  margin: var(--spacing-xxl) auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .social-links {
+    gap: var(--spacing-sm);
+  }
+  
+  .social-link {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .social-link svg {
+    width: 16px;
+    height: 16px;
+  }
+}

@@ -1,0 +1,170 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { links, blogAggregations } from '../../config/friends.ts';
+---
+
+<Layout title="友链">
+  <div class="friends-page">
+    <div class="container">
+      <h1 class="page-title">友情链接</h1>
+      <p class="page-description">感谢这些朋友的支持和关注</p>
+      
+      <div class="friends-grid">
+        {links.map((friend) => (
+          <a 
+            href={friend.url} 
+            target="_blank" 
+            rel="noopener" 
+            class="friend-card"
+            key={friend.name}
+          >
+            <div class="friend-info">
+              <h3 class="friend-name">{friend.name}</h3>
+              <p class="friend-desc">{friend.description}</p>
+            </div>
+            <div class="friend-url">{friend.url.replace('https://', '').replace('http://', '')}</div>
+          </a>
+        ))}
+      </div>
+      
+      <div class="aggregation-section">
+        <h2 class="aggregation-title">博客聚合平台</h2>
+        <div class="friends-grid">
+          {blogAggregations.map((agg) => (
+            <a 
+              href={agg.url} 
+              target="_blank" 
+              rel="noopener" 
+              class="friend-card"
+              key={agg.name}
+            >
+              <div class="friend-info">
+                <h3 class="friend-name">{agg.name}</h3>
+                <p class="friend-desc">{agg.description}</p>
+              </div>
+              <div class="friend-url">{agg.url.replace('https://', '').replace('http://', '')}</div>
+            </a>
+          ))}
+        </div>
+      </div>
+      
+      <div class="apply-section">
+        <h3 class="apply-title">申请友链</h3>
+        <p class="apply-desc">欢迎交换友链，请在下方留言或发送邮件联系我。</p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .friends-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+  
+  .page-description {
+    font-size: 14px;
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 40px;
+  }
+  
+  .friends-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  
+  .friend-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .friend-card:hover {
+    border-color: var(--color-link);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .friend-info {
+    flex: 1;
+    margin-bottom: 10px;
+  }
+  
+  .friend-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--color-text);
+  }
+  
+  .friend-desc {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  
+  .friend-url {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-family: monospace;
+  }
+  
+  .aggregation-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px dashed var(--color-border);
+  }
+  
+  .aggregation-title {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--color-text);
+  }
+  
+  .apply-section {
+    padding-top: 30px;
+    border-top: 1px dashed var(--color-border);
+    text-align: center;
+  }
+  
+  .apply-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+  
+  .apply-desc {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+  
+  @media (max-width: 768px) {
+    .friends-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .page-title {
+      font-size: 24px;
+    }
+  }
+</style>

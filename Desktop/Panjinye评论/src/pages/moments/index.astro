@@ -1,0 +1,438 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+interface FeedItem {
+  id: string | number;
+  title: string;
+  link: string;
+  content: string;
+  date: Date;
+  timestamp: number;
+  source: string;
+  colorIndex: number;
+}
+
+const formatTime = (date: Date) => {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) {
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours === 0) {
+      const minutes = Math.floor(diff / (1000 * 60));
+      return `${minutes}分钟前`;
+    }
+    return `${hours}小时前`;
+  } else if (days < 7) {
+    return `${days}天前`;
+  } else {
+    return date.toLocaleDateString('zh-CN');
+  }
+};
+
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+};
+
+const rainbowColors = [
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#06b6d4',
+  '#3b82f6',
+  '#a855f7',
+];
+
+const assignColorIndexes = (items: FeedItem[]) => {
+  let lastSource = '';
+  let colorIndex = 0;
+  
+  return items.map(item => {
+    if (item.source !== lastSource) {
+      if (lastSource !== '') {
+        colorIndex = (colorIndex + 1) % rainbowColors.length;
+      }
+      lastSource = item.source;
+    }
+    return { ...item, colorIndex };
+  });
+};
+
+const getFeeds = async () => {
+  const allItems: FeedItem[] = [];
+  const seenLinks = new Set<string>();
+  
+  try {
+    const response1 = await fetch('https://jh.3v.hk/api.php?action=get_all_items&uid=16&token=741afb1d210656544af0490d0824ca6e&limit=40');
+    const data1 = await response1.json();
+    if (data1.success && data1.data) {
+      data1.data.forEach((item: any) => {
+        if (!seenLinks.has(item.link)) {
+          seenLinks.add(item.link);
+          allItems.push({
+            id: `jh-${item.id}`,
+            title: item.title,
+            link: item.link,
+            content: stripHtml(item.description || ''),
+            date: new Date(item.pub_date),
+            timestamp: new Date(item.pub_date).getTime(),
+            source: item.feed_title || '订阅源',
+            colorIndex: 0,
+          });
+        }
+      });
+    }
+  } catch (e) {
+    console.error('API1 Error:', e);
+  }
+  
+  try {
+    const response2 = await fetch('https://lilog.cn/is/index.php?action=get_user_feeds&uid=54008&limit=30&token=2bd4eea157becfd45baf299494394392');
+    const data2 = await response2.json();
+    if (data2.status === 'success' && data2.data) {
+      data2.data.forEach((item: any) => {
+        if (!seenLinks.has(item.link)) {
+          seenLinks.add(item.link);
+          allItems.push({
+            id: `lilog-${item.link}`,
+            title: item.title,
+            link: item.link,
+            content: item.summary || '',
+            date: new Date(item.timestamp * 1000),
+            timestamp: item.timestamp * 1000,
+            source: item.source_title || '订阅源',
+            colorIndex: 0,
+          });
+        }
+      });
+    }
+  } catch (e) {
+    console.error('API2 Error:', e);
+  }
+  
+  const sorted = allItems.sort((a, b) => b.timestamp - a.timestamp);
+  return assignColorIndexes(sorted);
+};
+
+const allFeeds = await getFeeds();
+const initialFeeds = allFeeds.slice(0, 15);
+const totalCount = allFeeds.length;
+---
+
+<Layout title="朋友圈">
+  <div class="moments-page">
+    <div class="container">
+      <h1 class="page-title">朋友圈</h1>
+      <p class="page-description">关注的朋友们的最新动态</p>
+      
+      <div class="moments-timeline" id="moments-container">
+        {initialFeeds.map((feed) => (
+          <div class="moment-item" data-timestamp={feed.timestamp}>
+            <div class="moment-dot" style={`background: ${rainbowColors[feed.colorIndex]}`}></div>
+            <div class="moment-content">
+              <a href={feed.link} target="_blank" rel="noopener noreferrer" class="moment-link">
+                <h3 class="moment-title">{feed.title}</h3>
+                {feed.content && (
+                  <p class="moment-summary">{feed.content.substring(0, 150)}{feed.content.length > 150 ? '...' : ''}</p>
+                )}
+              </a>
+              <div class="moment-meta">
+                <span class="moment-source" style={`background: ${rainbowColors[feed.colorIndex]}20; color: ${rainbowColors[feed.colorIndex]}`}>{feed.source}</span>
+                <span class="moment-time">{formatTime(feed.date)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <div id="load-more-trigger" class="load-more-trigger">
+        <div class="loading-spinner"></div>
+        <p id="load-more-text">加载更多...</p>
+      </div>
+      
+      {totalCount === 0 && (
+        <p class="no-moments">暂无动态，快去关注一些朋友吧！</p>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ allFeeds: JSON.stringify(allFeeds), totalCount, rainbowColors }}>
+  (function() {
+    const container = document.getElementById('moments-container');
+    const trigger = document.getElementById('load-more-trigger');
+    const loadText = document.getElementById('load-more-text');
+    const allFeedsData = JSON.parse(allFeeds);
+    const colors = rainbowColors;
+    
+    let loadedCount = 15;
+    const itemsPerLoad = 10;
+    let isLoading = false;
+    
+    const formatTime = (date) => {
+      const now = new Date();
+      const diff = now.getTime() - date;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      
+      if (days === 0) {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        if (hours === 0) {
+          const minutes = Math.floor(diff / (1000 * 60));
+          return `${minutes}分钟前`;
+        }
+        return `${hours}小时前`;
+      } else if (days < 7) {
+        return `${days}天前`;
+      } else {
+        return new Date(date).toLocaleDateString('zh-CN');
+      }
+    };
+    
+    const createMomentItem = (feed) => {
+      const summary = feed.content ? feed.content.substring(0, 150) + (feed.content.length > 150 ? '...' : '') : '';
+      const timeStr = formatTime(feed.timestamp);
+      const color = colors[feed.colorIndex];
+      
+      const item = document.createElement('div');
+      item.className = 'moment-item';
+      item.dataset.timestamp = feed.timestamp;
+      
+      const dot = document.createElement('div');
+      dot.className = 'moment-dot';
+      dot.style.background = color;
+      
+      const content = document.createElement('div');
+      content.className = 'moment-content';
+      
+      const link = document.createElement('a');
+      link.href = feed.link;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'moment-link';
+      
+      const title = document.createElement('h3');
+      title.className = 'moment-title';
+      title.textContent = feed.title;
+      
+      link.appendChild(title);
+      
+      if (summary) {
+        const summaryEl = document.createElement('p');
+        summaryEl.className = 'moment-summary';
+        summaryEl.textContent = summary;
+        link.appendChild(summaryEl);
+      }
+      
+      const meta = document.createElement('div');
+      meta.className = 'moment-meta';
+      
+      const source = document.createElement('span');
+      source.className = 'moment-source';
+      source.textContent = feed.source;
+      source.style.background = color + '20';
+      source.style.color = color;
+      
+      const time = document.createElement('span');
+      time.className = 'moment-time';
+      time.textContent = timeStr;
+      
+      meta.appendChild(source);
+      meta.appendChild(time);
+      
+      content.appendChild(link);
+      content.appendChild(meta);
+      
+      item.appendChild(dot);
+      item.appendChild(content);
+      
+      return item;
+    };
+    
+    const loadMore = () => {
+      if (isLoading) return;
+      if (loadedCount >= allFeedsData.length) {
+        loadText.textContent = '没有更多了';
+        trigger.querySelector('.loading-spinner').style.display = 'none';
+        return;
+      }
+      
+      isLoading = true;
+      trigger.querySelector('.loading-spinner').style.display = 'block';
+      loadText.textContent = '加载中...';
+      
+      setTimeout(() => {
+        const nextItems = allFeedsData.slice(loadedCount, loadedCount + itemsPerLoad);
+        const fragment = document.createDocumentFragment();
+        
+        nextItems.forEach((feed) => {
+          const item = createMomentItem(feed);
+          fragment.appendChild(item);
+        });
+        
+        container.appendChild(fragment);
+        loadedCount += nextItems.length;
+        isLoading = false;
+        
+        if (loadedCount >= allFeedsData.length) {
+          loadText.textContent = '没有更多了';
+          trigger.querySelector('.loading-spinner').style.display = 'none';
+        } else {
+          loadText.textContent = '加载更多...';
+          trigger.querySelector('.loading-spinner').style.display = 'none';
+        }
+      }, 200);
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          loadMore();
+        }
+      });
+    }, {
+      rootMargin: '100px',
+      threshold: 0.1
+    });
+    
+    observer.observe(trigger);
+  })();
+</script>
+
+<style is:global>
+  html {
+    scroll-padding-top: calc(var(--header-height) + 20px);
+  }
+  
+  .moments-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+  
+  .page-description {
+    font-size: 14px;
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 40px;
+  }
+  
+  .moments-timeline {
+    position: relative;
+  }
+  
+  .moments-timeline::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-border);
+  }
+  
+  .moment-item {
+    position: relative;
+    display: flex;
+    gap: 20px;
+    padding-bottom: 28px;
+  }
+  
+  .moment-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    z-index: 1;
+    margin-top: 4px;
+  }
+  
+  .moment-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .moment-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .moment-link:hover .moment-title {
+    color: var(--color-accent);
+  }
+  
+  .moment-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text);
+    margin: 0 0 8px 0;
+    line-height: 1.5;
+    transition: color 0.2s;
+  }
+  
+  .moment-summary {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 10px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .moment-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+  
+  .moment-source {
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  
+  .load-more-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+  }
+  
+  .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .no-moments {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: 60px 20px;
+  }
+</style>

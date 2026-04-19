@@ -1,0 +1,424 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { COMMENT } from '../../config';
+import Artalk from '../../components/Artalk.astro';
+import Waline from '../../components/Waline.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { title, date, tags, category } = post.data;
+
+const d = new Date(date);
+const formattedDate = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const currentIndex = sortedPosts.findIndex(p => p.slug === post.slug);
+const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+---
+
+<Layout title={title}>
+  <article class="post-single">
+    <div class="post-container">
+      <div class="post-content-wrapper">
+        <div class="post-content">
+          <div class="container">
+            <header class="post-header">
+              <h1 class="post-title">{title}</h1>
+              <div class="post-meta">
+                <span class="post-date">{formattedDate}</span>
+                {category && (
+                  <span class="post-category">
+                    <a href={`/categories/${category}/`}>{category}</a>
+                  </span>
+                )}
+              </div>
+              {tags && tags.length > 0 && (
+                <div class="post-tags">
+                  {tags.map(tag => (
+                    <a href={`/tags/${tag}/`} class="tag" key={tag}>{tag}</a>
+                  ))}
+                </div>
+              )}
+            </header>
+            
+            <div class="post-body">
+              <Content />
+            </div>
+            
+            <nav class="post-nav">
+              {prevPost && (
+                <a href={`/blog/${prevPost.slug}/`} class="nav-item prev">
+                  <span class="nav-label">上一篇</span>
+                  <span class="nav-title">{prevPost.data.title}</span>
+                </a>
+              )}
+              {nextPost && (
+                <a href={`/blog/${nextPost.slug}/`} class="nav-item next">
+                  <span class="nav-label">下一篇</span>
+                  <span class="nav-title">{nextPost.data.title}</span>
+                </a>
+              )}
+            </nav>
+            
+            <div id="comments" class="comments-section">
+              <h3>评论区</h3>
+              {COMMENT.enabled ? (
+                COMMENT.system === 'artalk' ? (
+                  <Artalk />
+                ) : COMMENT.system === 'waline' ? (
+                  <Waline title={title} />
+                ) : (
+                  <p>评论系统未配置</p>
+                )
+              ) : (
+                <p>评论功能已关闭</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <aside class="outline-sidebar">
+        <div class="outline-container">
+          <h4 class="outline-title">文章大纲</h4>
+          <nav class="outline-nav" id="outlineNav">
+            <ul class="outline-list"></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
+  </article>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const headings = document.querySelectorAll('.post-body h2, .post-body h3');
+      const outlineList = document.querySelector('.outline-list');
+      const outlineSidebar = document.querySelector('.outline-sidebar');
+      
+      if (headings.length === 0) {
+        outlineSidebar.style.display = 'none';
+        return;
+      }
+      
+      headings.forEach((heading, index) => {
+        const id = `heading-${index}`;
+        heading.id = id;
+        
+        const li = document.createElement('li');
+        li.className = `outline-item ${heading.tagName.toLowerCase() === 'h3' ? 'outline-subitem' : ''}`;
+        
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        a.textContent = heading.textContent;
+        a.className = 'outline-link';
+        
+        li.appendChild(a);
+        outlineList.appendChild(li);
+        
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+          const offsetTop = heading.offsetTop - headerHeight - 20;
+          window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+          });
+        });
+      });
+      
+      window.addEventListener('scroll', () => {
+        let currentHeading = '';
+        headings.forEach((heading) => {
+          const rect = heading.getBoundingClientRect();
+          if (rect.top <= 100) {
+            currentHeading = heading.id;
+          }
+        });
+        
+        document.querySelectorAll('.outline-link').forEach((link) => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${currentHeading}`);
+        });
+      });
+    });
+  </script>
+</Layout>
+
+<style>
+  .post-single {
+    padding: 40px 20px;
+  }
+  
+  .post-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 40px;
+    position: relative;
+  }
+  
+  .post-content-wrapper {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+  
+  .post-content {
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .post-content .container {
+    left: 350px;
+  }
+  
+  .outline-sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + 40px);
+    width: 260px;
+    flex-shrink: 0;
+    height: fit-content;
+  }
+  
+  .post-single .float-buttons {
+    position: fixed;
+    right: calc((100vw - 1400px) / 2 + 20px);
+    top: calc(var(--header-height) + 60px);
+    bottom: auto;
+    left: auto;
+  }
+  
+  .post-header {
+    text-align: center;
+    margin-bottom: 45px;
+    padding-bottom: 35px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .post-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .post-date {
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+  
+  .post-category a {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  
+  .post-category a:hover {
+    color: var(--color-link);
+  }
+  
+  .post-title {
+    font-family: Georgia, serif;
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: var(--color-text);
+  }
+  
+  .post-tags {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .tag {
+    padding: 4px 14px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    text-decoration: none;
+  }
+  
+  .tag:hover {
+    border-color: var(--color-link);
+    color: var(--color-link);
+  }
+  
+  .post-body {
+    font-family: Georgia, serif;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--color-text);
+    margin-bottom: 45px;
+  }
+  
+  .post-body p {
+    margin-bottom: 22px;
+  }
+  
+  .post-body a {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+  
+  .post-body a:hover {
+    color: var(--color-link-hover);
+  }
+  
+  .post-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 25px;
+    padding-top: 35px;
+    border-top: 1px dashed var(--color-border);
+  }
+  
+  .nav-item {
+    flex: 1;
+    padding: 22px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-item.prev {
+    text-align: left;
+  }
+  
+  .nav-item.next {
+    text-align: right;
+  }
+  
+  .nav-label {
+    display: block;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+  }
+  
+  .nav-title {
+    display: block;
+    font-size: 13px;
+    color: var(--color-text);
+    line-height: 1.5;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-item:hover {
+    border-color: var(--color-link);
+    background-color: rgba(52, 152, 219, 0.05);
+  }
+  
+  .nav-item:hover .nav-title {
+    color: var(--color-link);
+  }
+  
+  .comments-section {
+    margin-top: 50px;
+    padding-top: 35px;
+    border-top: 1px solid var(--color-border);
+  }
+  
+  .comments-section h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: var(--color-text);
+  }
+  
+  .outline-sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + 40px);
+    width: 260px;
+    flex-shrink: 0;
+    height: fit-content;
+  }
+  
+  .outline-container {
+    padding: 0;
+    left: 200px;
+    width: 160px;
+  }
+  
+  .outline-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--color-text);
+  }
+  
+  .outline-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .outline-item {
+    margin-bottom: 8px;
+  }
+  
+  .outline-subitem {
+    padding-left: 15px;
+    margin-bottom: 6px;
+  }
+  
+  .outline-link {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: block;
+    line-height: 1.6;
+  }
+  
+  .outline-link:hover {
+    color: var(--color-link);
+  }
+  
+  .outline-link.active {
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+  
+  @media (max-width: 1024px) {
+    .outline-sidebar {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .post-single {
+      padding: 30px 15px;
+    }
+    
+    .post-title {
+      font-size: 26px;
+    }
+    
+    .post-body {
+      font-size: 14px;
+    }
+    
+    .post-nav {
+      flex-direction: column;
+    }
+    
+    .nav-item {
+      text-align: left !important;
+    }
+  }
+</style>

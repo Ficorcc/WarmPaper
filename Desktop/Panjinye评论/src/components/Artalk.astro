@@ -1,0 +1,26 @@
+---
+import { COMMENT } from '../config';
+
+const { server, site } = COMMENT.artalk;
+
+if (!server || !site) {
+  return null;
+}
+---
+
+<link href="https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.js"></script>
+
+<div id="comments-container"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    Artalk.init({
+      el: '#comments-container',
+      server: '{server}',
+      site: '{site}',
+      pageKey: window.location.pathname,
+      pageTitle: document.title,
+    });
+  });
+</script>

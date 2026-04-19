@@ -1,0 +1,53 @@
+/* ========================================
+   CSS Variables - Ficor Astro Theme
+   ======================================== */
+
+:root {
+  /* Colors */
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-text: #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+  --color-border: #e8e8e8;
+  --color-accent: #2c3e50;
+  --color-accent-hover: #34495e;
+  --color-link: #3498db;
+  --color-link-hover: #2980b9;
+  --color-shadow: rgba(0, 0, 0, 0.15);
+  
+  /* Typography */
+  --font-serif: 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+  
+  /* Layout */
+  --container-max-width: 800px;
+  --header-height: 60px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --color-bg: #1a1a1a;
+  --color-surface: #2d2d2d;
+  --color-text: #e0e0e0;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #808080;
+  --color-border: #404040;
+  --color-accent: #ecf0f1;
+  --color-accent-hover: #bdc3c7;
+  --color-link: #5dade2;
+  --color-link-hover: #85c1e9;
+  --color-shadow: rgba(255, 255, 255, 0.1);
+}

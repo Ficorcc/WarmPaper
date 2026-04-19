@@ -1,0 +1,204 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const postsByYear = sortedPosts.reduce((acc, post) => {
+  const year = post.data.date.getFullYear();
+  if (!acc[year]) {
+    acc[year] = [];
+  }
+  acc[year].push(post);
+  return acc;
+}, {});
+---
+
+<Layout title="归档">
+  <div class="archive-page">
+    <div class="container">
+      <h1 class="page-title">归档</h1>
+      <p class="page-description">记录所有的文章和记忆</p>
+      
+      {Object.entries(postsByYear).sort((a, b) => b[0] - a[0]).map(([year, posts]) => (
+        <div class="archive-year" key={year}>
+          <button class="year-toggle">
+            <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            <span class="year-text">{year}年</span>
+            <span class="year-count">({posts.length})</span>
+          </button>
+          <ul class="archive-list">
+            {posts.map(post => {
+              const date = post.data.date;
+              const month = date.getMonth() + 1;
+              const day = date.getDate();
+              return (
+                <li class="archive-item" key={post.slug}>
+                  <span class="archive-date">{month}月{day}日</span>
+                  <a href={`/blog/${post.slug}/`} class="archive-title">{post.data.title}</a>
+                  {post.data.category && (
+                    <span class="archive-category">{post.data.category}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          function toggleYear(button) {
+            const yearDiv = button.parentElement;
+            const list = yearDiv.querySelector('.archive-list');
+            const icon = button.querySelector('.toggle-icon');
+            
+            if (list.style.maxHeight) {
+              list.style.maxHeight = null;
+              icon.style.transform = 'rotate(0deg)';
+            } else {
+              list.style.maxHeight = list.scrollHeight + 'px';
+              icon.style.transform = 'rotate(180deg)';
+            }
+            
+            button.classList.toggle('expanded');
+          }
+          
+          document.querySelectorAll('.year-toggle').forEach(button => {
+            button.addEventListener('click', () => toggleYear(button));
+            
+            const yearText = button.querySelector('.year-text').textContent;
+            const year = parseInt(yearText.replace('年', ''));
+            const currentYear = new Date().getFullYear();
+            const list = button.parentElement.querySelector('.archive-list');
+            const icon = button.querySelector('.toggle-icon');
+            
+            if (year === currentYear) {
+              list.style.maxHeight = list.scrollHeight + 'px';
+              icon.style.transform = 'rotate(180deg)';
+              button.classList.add('expanded');
+            }
+          });
+        });
+      </script>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .archive-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+  
+  .page-description {
+    font-size: 14px;
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 40px;
+  }
+  
+  .archive-year {
+    margin-bottom: var(--spacing-xxl);
+  }
+  
+  .year-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+    padding: var(--spacing-md) 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--transition-fast);
+  }
+  
+  .year-toggle:hover {
+    background-color: rgba(52, 152, 219, 0.05);
+  }
+  
+  .toggle-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-accent);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+  }
+  
+  .year-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  
+  .year-count {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-left: auto;
+  }
+  
+  .archive-list {
+    list-style: none;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-normal);
+  }
+  
+  .archive-year:has(.year-toggle.expanded) .archive-list {
+    max-height: 1000px;
+  }
+  
+  .archive-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px dashed var(--color-border);
+    padding-left: calc(var(--spacing-md) + 20px);
+  }
+  
+  .archive-item:last-child {
+    border-bottom: none;
+  }
+  
+  .archive-date {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    width: 100px;
+    flex-shrink: 0;
+  }
+  
+  .archive-title {
+    flex: 1;
+    font-size: 1rem;
+    color: var(--color-text);
+    transition: color var(--transition-fast);
+  }
+  
+  .archive-title:hover {
+    color: var(--color-link);
+  }
+  
+  .archive-category {
+    font-size: 0.8rem;
+    color: var(--color-link);
+    background-color: rgba(52, 152, 219, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+</style>

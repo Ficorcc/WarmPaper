@@ -1,0 +1,196 @@
+---
+import { MENU, FRIENDS_LINKS, MORE_LINKS } from '../config';
+---
+
+<header class="header">
+  <div class="container">
+    <nav class="nav">
+      <a href="/" class="logo">
+        <span class="logo-text">老潘在路上</span>
+      </a>
+      
+      <ul class="nav-menu">
+        {MENU.map(item => (
+          <li class={`nav-item ${item.hasDropdown ? 'nav-dropdown' : ''}`}>
+            {item.hasDropdown ? (
+              <>
+                <button class="nav-link dropdown-toggle" id={`${item.name}-dropdown-btn`}>
+                  {item.name}
+                  <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6,9 12,15 18,9"></polyline>
+                  </svg>
+                </button>
+                <ul class="dropdown-menu" id={`${item.name}-dropdown-menu`}>
+                  <li class="dropdown-item">
+                    <a href={item.url} class="dropdown-link">
+                      {item.name}
+                    </a>
+                  </li>
+                  <hr class="dropdown-divider" />
+                  {item.name === '友链' && FRIENDS_LINKS.map(link => (
+                    <li class="dropdown-item">
+                      <a href={link.url} class="dropdown-link">
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <a href={item.url} class="nav-link">
+                {item.name}
+              </a>
+            )}
+          </li>
+        ))}
+        <li class="nav-item nav-dropdown">
+          <button class="nav-link dropdown-toggle" id="more-dropdown-btn">
+            更多
+            <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
+          </button>
+          <ul class="dropdown-menu" id="more-dropdown-menu">
+            {MORE_LINKS.map(link => (
+              <li class="dropdown-item">
+                <a href={link.url} target="_blank" rel="noopener noreferrer" class="dropdown-link">
+                  {link.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </li>
+      </ul>
+      
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  
+  themeToggle?.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  });
+  
+  const dropdownBtns = document.querySelectorAll('.dropdown-toggle');
+  
+  dropdownBtns.forEach(btn => {
+    btn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menuId = btn.id.replace('-btn', '-menu');
+      const menu = document.getElementById(menuId);
+      
+      document.querySelectorAll('.dropdown-menu').forEach(m => {
+        if (m.id !== menuId) {
+          m.classList.remove('show');
+        }
+      });
+      
+      menu?.classList.toggle('show');
+    });
+  });
+  
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+      menu.classList.remove('show');
+    });
+  });
+</script>
+
+<style is:global>
+  .nav-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .nav-dropdown {
+    position: relative;
+  }
+  
+  .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    height: 100%;
+  }
+  
+  .dropdown-arrow {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s;
+  }
+  
+  .nav-dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 120px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 8px 0;
+    list-style: none;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+  }
+  
+  .nav-dropdown:hover .dropdown-menu,
+  .dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .dropdown-item {
+    padding: 0;
+  }
+  
+  .dropdown-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 6px 12px;
+  }
+  
+  .dropdown-link {
+    display: block;
+    padding: 8px 16px;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  
+  .dropdown-link:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-accent);
+  }
+</style>

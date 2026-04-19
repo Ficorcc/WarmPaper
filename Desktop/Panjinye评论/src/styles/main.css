@@ -1,0 +1,103 @@
+/* ========================================
+   Main Layout Styles
+   ======================================== */
+
+.main {
+  min-height: calc(100vh - var(--header-height) - 200px);
+  padding: var(--spacing-xl) 0;
+}
+
+/* Reading progress bar */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--color-link);
+  z-index: 1000;
+  transition: width 0.1s ease;
+}
+
+/* Float buttons */
+.float-buttons {
+  position: fixed;
+  right: 20px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+}
+
+.float-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.float-btn:hover {
+  transform: scale(1.05);
+}
+
+.float-btn.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.float-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.back-to-top {
+  order: 1;
+}
+
+.go-to-comments {
+  order: 2;
+}
+
+[data-theme="light"] .float-btn {
+  background-color: var(--color-bg);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+}
+
+[data-theme="light"] .float-btn:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+[data-theme="dark"] .float-btn {
+  background-color: var(--color-bg);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+}
+
+[data-theme="dark"] .float-btn:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+@media (max-width: 768px) {
+  .float-buttons {
+    right: 15px;
+    bottom: 60px;
+  }
+  
+  .float-btn {
+    width: 44px;
+    height: 44px;
+  }
+}

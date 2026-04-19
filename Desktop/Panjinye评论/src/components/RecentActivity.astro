@@ -1,0 +1,205 @@
+---
+const response = await fetch('https://memos.ficor.net/api/v1/memos');
+const data = await response.json();
+const memos = data.memos || [];
+const recentMemos = memos.slice(0, 2);
+
+const formatTime = (dateString: string) => {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) {
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours === 0) {
+      const minutes = Math.floor(diff / (1000 * 60));
+      return `${minutes}分钟前`;
+    }
+    return `${hours}小时前`;
+  } else if (days < 7) {
+    return `${days}天前`;
+  } else {
+    return date.toLocaleDateString('zh-CN');
+  }
+};
+
+const getMemoId = (name) => {
+  return name.split('/')[1];
+};
+
+const getIconByTags = (content: string, tags: string[]) => {
+  const allTags = [...tags];
+  const contentTags = content.match(/#(\w+)/g) || [];
+  contentTags.forEach(tag => allTags.push(tag.replace('#', '')));
+  
+  for (const tag of allTags) {
+    if (tag.includes('手机') || tag.includes('数码') || tag.includes('科技')) {
+      return 'phone';
+    }
+    if (tag.includes('网站') || tag.includes('博客') || tag.includes('技术')) {
+      return 'code';
+    }
+    if (tag.includes('生活') || tag.includes('日常') || tag.includes('记录')) {
+      return 'life';
+    }
+    if (tag.includes('分享') || tag.includes('推荐') || tag.includes('好物')) {
+      return 'share';
+    }
+    if (tag.includes('读书') || tag.includes('电影') || tag.includes('音乐')) {
+      return 'media';
+    }
+  }
+  return 'default';
+};
+---
+
+<div class="activity-section">
+  <div class="activity-list">
+    {recentMemos.length > 0 ? (
+      recentMemos.map((memo, index) => {
+        const iconType = getIconByTags(memo.content, memo.tags || []);
+        return (
+        <div class="activity-item">
+          <span class="activity-icon" data-type={iconType}>
+            {iconType === 'phone' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+            )}
+            {iconType === 'code' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+            )}
+            {iconType === 'life' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            )}
+            {iconType === 'share' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            )}
+            {iconType === 'media' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            )}
+            {iconType === 'default' && (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            )}
+          </span>
+          <div class="activity-content">
+            <span class="activity-time">{formatTime(memo.displayTime)}</span>
+            <p class="activity-text">
+              <a href="https://memos.ficor.net/" target="_blank" rel="noopener noreferrer">{memo.content}</a>
+            </p>
+          </div>
+        </div>
+      )})
+    ) : (
+      <p class="no-activity">暂无动态</p>
+    )}
+  </div>
+</div>
+
+<style>
+  .activity-section {
+    margin-top: 20px;
+  }
+  
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .activity-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: white;
+    flex-shrink: 0;
+  }
+  
+  .activity-icon[data-type="phone"] {
+    background: #3b82f6;
+  }
+  
+  .activity-icon[data-type="code"] {
+    background: #10b981;
+  }
+  
+  .activity-icon[data-type="life"] {
+    background: #f59e0b;
+  }
+  
+  .activity-icon[data-type="share"] {
+    background: #8b5cf6;
+  }
+  
+  .activity-icon[data-type="media"] {
+    background: #ec4899;
+  }
+  
+  .activity-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .activity-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .activity-time {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  .activity-text {
+    font-size: 14px;
+    color: var(--color-text);
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .activity-text a {
+    color: inherit;
+    text-decoration: none;
+  }
+  
+  .activity-text a:hover {
+    color: var(--color-accent);
+  }
+  
+  .no-activity {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 20px;
+  }
+</style>

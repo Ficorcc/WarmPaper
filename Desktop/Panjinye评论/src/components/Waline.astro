@@ -1,0 +1,36 @@
+---
+import { COMMENT } from '../config';
+
+const { serverURL, pageview, comment } = COMMENT.waline;
+
+if (!serverURL) {
+  return null;
+}
+
+const path = Astro.url.pathname;
+const title = Astro.props.title || '文章评论';
+---
+
+<link href="https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@waline/client@latest/dist/waline.js"></script>
+
+<div id="waline-container"></div>
+
+<script>
+  const initWaline = () => {
+    Waline({
+      el: '#waline-container',
+      serverURL: '{serverURL}',
+      path: '{path}',
+      title: '{title}',
+      pageview: {pageview},
+      comment: {comment},
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWaline);
+  } else {
+    initWaline();
+  }
+</script>

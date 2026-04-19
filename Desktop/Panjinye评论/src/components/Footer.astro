@@ -1,0 +1,53 @@
+---
+import { SITE, TEN_YEAR_PACT } from '../config';
+
+const getYearsRunning = () => {
+  const founded = new Date(SITE.foundedDate);
+  const now = new Date();
+  const years = now.getFullYear() - founded.getFullYear();
+  const months = now.getMonth() - founded.getMonth();
+  if (months < 0) return years - 1;
+  return years;
+};
+
+const getPactDaysLeft = () => {
+  const endDate = new Date(TEN_YEAR_PACT.endDate);
+  const now = new Date();
+  const diff = Number(endDate) - Number(now);
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <p class="copyright">
+        &copy; {new Date(SITE.foundedDate).getFullYear()}-{new Date().getFullYear()} {SITE.title}. 保留所有权利。
+      </p>
+      {TEN_YEAR_PACT.enabled && (
+        <p class="ten-year-pact">
+          本站已加入「十年之约」，距离约定还有 {getPactDaysLeft()} 天
+        </p>
+      )}
+    </div>
+    <p class="powered">
+      使用 <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a> 构建
+      · 主题 <a href="https://github.com/ficor/ficor" target="_blank" rel="noopener">Ficor</a>
+    </p>
+  </div>
+</footer>
+
+<style is:global>
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .ten-year-pact {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+</style>

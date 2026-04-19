@@ -1,0 +1,65 @@
+/* ========================================
+   Pagination Styles
+   ======================================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xxl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+.pagination-prev,
+.pagination-next,
+.pagination-first,
+.pagination-last {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.pagination-prev:hover,
+.pagination-next:hover,
+.pagination-first:hover,
+.pagination-last:hover {
+  border-color: var(--color-link);
+  color: var(--color-link);
+}
+
+.pagination-prev.disabled,
+.pagination-next.disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.pagination-prev.disabled:hover,
+.pagination-next.disabled:hover {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.pagination-prev svg,
+.pagination-next svg,
+.pagination-first svg,
+.pagination-last svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}

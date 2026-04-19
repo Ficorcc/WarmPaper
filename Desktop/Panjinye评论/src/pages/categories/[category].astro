@@ -1,0 +1,54 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const categories = [...new Set(posts.map(post => post.data.category).filter(Boolean))];
+  
+  return categories.map(category => ({
+    params: { category },
+    props: { category },
+  }));
+}
+
+const { category } = Astro.props;
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const categoryPosts = allPosts
+  .filter(post => post.data.category === category)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Layout title={`${category} - 分类`}>
+  <div class="container">
+    <header class="page-header">
+      <h1 class="page-title">分类: {category}</h1>
+      <p class="page-description">{categoryPosts.length} 篇文章</p>
+    </header>
+    
+    <div class="posts-list">
+      {categoryPosts.map(post => (
+        <PostCard post={post} />
+      ))}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xxl);
+  }
+  
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .page-description {
+    color: var(--color-text-secondary);
+  }
+</style>

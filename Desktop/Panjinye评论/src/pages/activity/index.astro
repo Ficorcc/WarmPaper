@@ -1,0 +1,280 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const response = await fetch('https://memos.ficor.net/api/v1/memos');
+const data = await response.json();
+const memos = data.memos || [];
+
+const formatTime = (dateString: string) => {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) {
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours === 0) {
+      const minutes = Math.floor(diff / (1000 * 60));
+      return `${minutes}分钟前`;
+    }
+    return `${hours}小时前`;
+  } else if (days < 7) {
+    return `${days}天前`;
+  } else {
+    return date.toLocaleDateString('zh-CN');
+  }
+};
+
+const getMemoId = (name) => {
+  return name.split('/')[1];
+};
+
+const getIconByTags = (content: string, tags: string[]) => {
+  const allTags = [...tags];
+  const contentTags = content.match(/#(\w+)/g) || [];
+  contentTags.forEach(tag => allTags.push(tag.replace('#', '')));
+  
+  for (const tag of allTags) {
+    if (tag.includes('手机') || tag.includes('数码') || tag.includes('科技')) {
+      return 'phone';
+    }
+    if (tag.includes('网站') || tag.includes('博客') || tag.includes('技术')) {
+      return 'code';
+    }
+    if (tag.includes('生活') || tag.includes('日常') || tag.includes('记录')) {
+      return 'life';
+    }
+    if (tag.includes('分享') || tag.includes('推荐') || tag.includes('好物')) {
+      return 'share';
+    }
+    if (tag.includes('读书') || tag.includes('电影') || tag.includes('音乐')) {
+      return 'media';
+    }
+  }
+  return 'default';
+};
+---
+
+<Layout title="动态">
+  <div class="activity-page">
+    <div class="container">
+      <h1 class="page-title">动态</h1>
+      <p class="page-description">记录生活中的点点滴滴</p>
+      
+      <div class="activity-timeline">
+        {memos.map((memo, index) => {
+          const iconType = getIconByTags(memo.content, memo.tags || []);
+          return (
+          <a class="activity-item" id={getMemoId(memo.name)} href="https://memos.ficor.net/" target="_blank" rel="noopener noreferrer">
+            <div class="activity-dot" data-type={iconType}>
+              {iconType === 'phone' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                  <line x1="12" y1="18" x2="12.01" y2="18"/>
+                </svg>
+              )}
+              {iconType === 'code' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+              )}
+              {iconType === 'life' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              )}
+              {iconType === 'share' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="5" r="3"/>
+                  <circle cx="6" cy="12" r="3"/>
+                  <circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+              )}
+              {iconType === 'media' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              )}
+              {iconType === 'default' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+              )}
+            </div>
+            <div class="activity-content">
+              <div class="activity-header">
+                <p class="activity-text">{memo.content}</p>
+                <span class="activity-time">{formatTime(memo.displayTime)}</span>
+              </div>
+              {memo.attachments && memo.attachments.length > 0 && (
+                <div class="activity-images">
+                  {memo.attachments.map((attachment, idx) => (
+                    attachment.type?.startsWith('image/') && (
+                      <img 
+                        src={`https://memos.ficor.net/o/${attachment.name}`} 
+                        alt="附件图片" 
+                        class="activity-image"
+                        loading="lazy"
+                      />
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+          </a>
+        )})}
+      </div>
+      
+      {memos.length === 0 && (
+        <p class="no-activity">暂无动态，快来发布第一条动态吧！</p>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<style>
+  html {
+    scroll-padding-top: calc(var(--header-height) + 20px);
+  }
+  
+  .activity-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--color-text);
+  }
+  
+  .page-description {
+    font-size: 14px;
+    text-align: center;
+    color: var(--color-text-muted);
+    margin-bottom: 40px;
+  }
+  
+  .activity-timeline {
+    position: relative;
+  }
+  
+  .activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-border);
+  }
+  
+  .activity-item {
+    position: relative;
+    display: flex;
+    gap: 20px;
+    padding-bottom: 32px;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+  }
+  
+  .activity-item:hover {
+    opacity: 0.8;
+  }
+  
+  .activity-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  
+  .activity-dot[data-type="phone"] {
+    background: #3b82f6;
+  }
+  
+  .activity-dot[data-type="code"] {
+    background: #10b981;
+  }
+  
+  .activity-dot[data-type="life"] {
+    background: #f59e0b;
+  }
+  
+  .activity-dot[data-type="share"] {
+    background: #8b5cf6;
+  }
+  
+  .activity-dot[data-type="media"] {
+    background: #ec4899;
+  }
+  
+  .activity-dot svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .activity-content {
+    flex: 1;
+    padding-top: 10px;
+  }
+  
+  .activity-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .activity-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--color-text);
+    margin: 0;
+    white-space: pre-wrap;
+    flex: 1;
+  }
+  
+  .activity-time {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+  
+  .activity-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  
+  .activity-image {
+    max-width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .activity-image:hover {
+    transform: scale(1.02);
+  }
+  
+  .no-activity {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: 60px 20px;
+  }
+</style>
