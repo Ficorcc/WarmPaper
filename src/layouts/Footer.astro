@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import type { ThemeConfig } from '../config';
+
+interface Props {
+  config: ThemeConfig;
+}
+
+const { config } = Astro.props;
+const currentYear = new Date().getFullYear();
+
+// compute stats
+const allPosts = await getCollection('posts');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const totalArticles = sortedPosts.length;
+const totalComments = sortedPosts.reduce((sum, p) => sum + (p.data.commentCount ?? 0), 0);
+
+let runningDays = 0;
+if (config.since) {
+  const since = new Date(config.since);
+  const now = new Date();
+  runningDays = Math.floor((now.getTime() - since.getTime()) / (1000 * 60 * 60 * 24));
+}
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <nav class="footer-nav">
+      <a href="/tags">标签</a>
+      <a href="/categories">分类</a>
+    </nav>
+    {config.copyright ? (
+      <p class="footer-copyright">{config.copyright}</p>
+    ) : (
+      <p class="footer-copyright">&copy; {currentYear} <a href="https://ficor.net" target="_blank" rel="noopener">{config.site.author || config.site.title}</a></p>
+    )}
+    <p class="footer-powered">
+      Powered by <a href="https://astro.build/" target="_blank" rel="noopener">Astro</a>
+      &middot; Theme <a href="https://github.com/finch-xu/hexo-theme-warmpaper" target="_blank" rel="noopener">Warmpaper</a>
+    </p>
+    <div class="footer-stats">
+      {runningDays > 0 && <>本站已运行 <strong>{runningDays}</strong> 天，</>}
+      共 <strong>{totalArticles}</strong> 篇文章{totalComments > 0 && <>和 <strong>{totalComments}</strong> 条评论</>}
+    </div>
+  </div>
+</footer>

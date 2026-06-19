@@ -1,0 +1,74 @@
+---
+interface Props {
+  serverURL: string;
+}
+
+const { serverURL } = Astro.props;
+---
+
+<section class="comments-section" aria-labelledby="comments-title">
+  <h2 id="comments-title" class="comments-title">评论</h2>
+  <div id="waline-comments" data-server-url={serverURL}></div>
+  <noscript>
+    <p class="comments-noscript">评论区需要启用 JavaScript 后显示。</p>
+  </noscript>
+</section>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@v3/dist/waline.css" />
+<script type="module" is:inline>
+  import { init } from 'https://cdn.jsdelivr.net/npm/@waline/client@v3/dist/waline.js';
+
+  const el = document.getElementById('waline-comments');
+
+  if (el && el.dataset.serverUrl) {
+    const nativeOpen = window.open.bind(window);
+
+    window.open = (url, target, features) => {
+      if (typeof url === 'string' && url.includes('/ui/login')) {
+        const loginURL = new URL(url, window.location.href);
+
+        loginURL.searchParams.delete('redirect');
+
+        return nativeOpen(loginURL.toString(), target, features);
+      }
+
+      return nativeOpen(url, target, features);
+    };
+
+    init({
+      el,
+      serverURL: el.dataset.serverUrl,
+      lang: 'zh-CN',
+      dark: 'html[data-theme="dark"]',
+    });
+
+    const alignCommentMeta = () => {
+      el.querySelectorAll('.wl-card-item').forEach((item) => {
+        const card = item.querySelector('.wl-card');
+        if (!card) return;
+
+        const head = card.querySelector('.wl-head');
+        const nick = card.querySelector('.wl-nick');
+        const time = card.querySelector('.wl-time');
+        const meta = card.querySelector('.wl-meta');
+        const icons = item.querySelectorAll('.wl-user svg');
+
+        if (head && time && meta && meta.parentElement !== head) {
+          time.insertAdjacentElement('afterend', meta);
+        }
+
+        if (head && nick && time && icons.length) {
+          icons.forEach((icon) => {
+            icon.classList.add('wl-inline-user-icon');
+            time.insertAdjacentElement('beforebegin', icon);
+          });
+        }
+      });
+    };
+
+    alignCommentMeta();
+
+    const observer = new MutationObserver(alignCommentMeta);
+    observer.observe(el, { childList: true, subtree: true });
+  }
+</script>

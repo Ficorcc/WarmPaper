@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Profile from '../components/Profile.astro';
+import PostCard from '../components/PostCard.astro';
+import Pagination from '../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import { DEFAULT_CONFIG } from '../config';
+
+const config = DEFAULT_CONFIG;
+const allPosts = await getCollection('posts');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const currentPage = 1;
+const postsPerPage = 10;
+const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+const posts = sortedPosts.slice(0, postsPerPage);
+---
+
+<BaseLayout config={config}>
+  {config.profile && <Profile profile={config.profile} site={config.site} />}
+  
+  <div class="post-list">
+    {posts.map((post) => (
+      <PostCard post={post} excerptLink={config.excerptLink} />
+    ))}
+  </div>
+  
+  {totalPages > 1 && (
+    <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/" />
+  )}
+</BaseLayout>

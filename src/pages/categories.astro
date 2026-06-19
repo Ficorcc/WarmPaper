@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { DEFAULT_CONFIG } from '../config';
+
+const config = DEFAULT_CONFIG;
+const allPosts = await getCollection('posts');
+
+const categoryMap: Record<string, number> = {};
+for (const post of allPosts) {
+  if (post.data.categories) {
+    for (const category of post.data.categories) {
+      categoryMap[category] = (categoryMap[category] || 0) + 1;
+    }
+  }
+}
+
+const categories = Object.entries(categoryMap).sort((a, b) => b[1] - a[1]);
+---
+
+<BaseLayout config={config} title="分类">
+  <div class="page-content">
+    <h1>分类</h1>
+    {categories.length > 0 ? (
+      <div class="category-list">
+        {categories.map(([category, count]) => (
+          <a class="category-list-item" href={`/categories/${category}`}>
+            <span class="category-list-name">{category}</span>
+            <span class="category-list-count">{count}</span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="no-data">暂无分类</p>
+    )}
+  </div>
+</BaseLayout>

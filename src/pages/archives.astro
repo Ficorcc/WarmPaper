@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { DEFAULT_CONFIG } from '../config';
+
+const config = DEFAULT_CONFIG;
+const allPosts = await getCollection('posts');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getYear(date: Date): number {
+  return date.getFullYear();
+}
+
+const postsByYear: Record<number, typeof allPosts> = {};
+for (const post of sortedPosts) {
+  const year = getYear(post.data.pubDate);
+  if (!postsByYear[year]) {
+    postsByYear[year] = [];
+  }
+  postsByYear[year].push(post);
+}
+
+const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
+---
+
+<BaseLayout config={config} title="归档">
+  <div class="archive">
+    <h1 class="archive-title">归档</h1>
+    {years.map((year) => (
+      <>
+        <h2 class="archive-year">{year}</h2>
+        {postsByYear[Number(year)].map((post) => (
+          <div class="archive-post">
+            <span class="archive-post-date">
+              {formatDate(post.data.pubDate).substring(5)}
+            </span>
+            <span class="archive-post-title">
+              <a href={`/posts/${post.slug}`}>{post.data.title || '(Untitled)'}</a>
+            </span>
+          </div>
+        ))}
+      </>
+    ))}
+  </div>
+</BaseLayout>

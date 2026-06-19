@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+  excerptLink?: string;
+}
+
+const { post, excerptLink = 'Read More' } = Astro.props;
+const { data } = post;
+
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+function getExcerpt(content: string): string {
+  const stripped = content.replace(/<[^>]*>/g, '');
+  return stripped.substring(0, 200) + '...';
+}
+---
+
+<article class="post-card">
+  <h2 class="post-card-title">
+    <a href={`/posts/${post.slug}`}>{data.title || '(Untitled)'}</a>
+  </h2>
+  <div class="post-card-meta">
+    <time datetime={formatDate(data.pubDate)}>{formatDate(data.pubDate)}</time>
+    {data.categories && data.categories.length > 0 && (
+      <>
+        <span class="separator">&middot;</span>
+        {data.categories.map((cat, index) => (
+          <>
+            {index > 0 && <span>, </span>}
+            <a href={`/categories/${cat}`}>{cat}</a>
+          </>
+        ))}
+      </>
+    )}
+    {(data.commentCount ?? 0) > 0 && (
+      <>
+        <span class="separator">&middot;</span>
+        <span class="comment-count">{data.commentCount} 条评论</span>
+      </>
+    )}
+  </div>
+  <div class="post-card-excerpt">
+    {data.description ? (
+      <p>{data.description}</p>
+    ) : (
+      <p>{getExcerpt(post.body || '')}</p>
+    )}
+  </div>
+  <a class="read-more" href={`/posts/${post.slug}`}>{excerptLink} &rarr;</a>
+  {data.tags && data.tags.length > 0 && (
+    <div class="post-card-tags">
+      {data.tags.map((tag) => (
+        <a href={`/tags/${tag}`}>#{tag}</a>
+      ))}
+    </div>
+  )}
+</article>

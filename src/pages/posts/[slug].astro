@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Toc from '../../components/Toc.astro';
+import WalineComments from '../../components/WalineComments.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { DEFAULT_CONFIG } from '../../config';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await post.render();
+const config = DEFAULT_CONFIG;
+
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+const toc = headings
+  .filter((h) => h.depth >= config.toc.minDepth && h.depth <= config.toc.maxDepth)
+  .map((h) => ({
+    depth: h.depth,
+    slug: h.slug,
+    text: h.text,
+  }));
+
+const allPosts = await getCollection('posts');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = sortedPosts.findIndex((p) => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+---
+
+<BaseLayout config={config} title={post.data.title}>
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">{post.data.title}</h1>
+      <div class="post-meta">
+        <time datetime={formatDate(post.data.pubDate)}>{formatDate(post.data.pubDate)}</time>
+        {post.data.categories && post.data.categories.length > 0 && (
+          <>
+            <span class="separator">&middot;</span>
+            {post.data.categories.map((cat, index) => (
+              <>
+                {index > 0 && <span>, </span>}
+                <a href={`/categories/${cat}`}>{cat}</a>
+              </>
+            ))}
+          </>
+        )}
+      </div>
+    </header>
+
+    <div class="post-body-wrapper">
+      <div class="post-content">
+        <Content />
+      </div>
+      {config.toc.enable && toc.length > 0 && <Toc toc={toc} />}
+    </div>
+
+    <footer class="post-footer">
+      {post.data.tags && post.data.tags.length > 0 && (
+        <div class="post-tags">
+          {post.data.tags.map((tag) => (
+            <a href={`/tags/${tag}`}>#{tag}</a>
+          ))}
+        </div>
+      )}
+      <div class="post-license">
+        <div>
+          <span>作者</span>
+          <strong>{config.site.author}</strong>
+        </div>
+        <div>
+          <span>版权</span>
+          <p>原创文章，转载请注明作者与出处。</p>
+        </div>
+      </div>
+      <nav class="post-nav">
+        {prevPost && (
+          <a class="prev" href={`/posts/${prevPost.slug}`}>
+            <span class="post-nav-label">上一篇</span>
+            <span class="post-nav-title">{prevPost.data.title}</span>
+          </a>
+        )}
+        {nextPost && (
+          <a class="next" href={`/posts/${nextPost.slug}`}>
+            <span class="post-nav-label">下一篇</span>
+            <span class="post-nav-title">{nextPost.data.title}</span>
+          </a>
+        )}
+      </nav>
+    </footer>
+
+    <div class="post-comments-divider" aria-hidden="true"></div>
+
+    {config.comments?.enable && (
+      <WalineComments serverURL={config.comments.serverURL} />
+    )}
+  </article>
+</BaseLayout>

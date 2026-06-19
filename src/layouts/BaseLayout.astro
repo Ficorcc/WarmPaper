@@ -1,0 +1,191 @@
+---
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import '../styles/global.css';
+import type { ThemeConfig } from '../config';
+
+interface Props {
+  config: ThemeConfig;
+  title?: string;
+  description?: string;
+}
+
+const { config, title, description } = Astro.props;
+const siteTitle = title ? `${title} | ${config.site.title}` : config.site.title;
+const siteDescription = description || config.site.description;
+---
+
+<!DOCTYPE html>
+<html lang={config.site.language || 'en'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <title>{siteTitle}</title>
+    <meta name="description" content={siteDescription} />
+    <link rel="icon" href="/logo.png" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    {config.comments?.enable && <link rel="preconnect" href={config.comments.serverURL} crossorigin />}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-gb-web@latest/lxgwwenkaigb-regular/result.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-gb-web@latest/lxgwwenkaigb-medium/result.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style is:inline>
+      @font-face {
+        font-family: 'LXGW WenKai GB';
+        font-display: swap;
+      }
+    </style>
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('warmpaper-theme');
+          if (saved === 'dark' || saved === 'light') {
+            document.documentElement.setAttribute('data-theme', saved);
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="site-wrapper">
+      <Header config={config} />
+      <main class="main-content">
+        <slot />
+      </main>
+      <Footer config={config} />
+    </div>
+    <nav class="scroll-controls" aria-label="页面滚动导航">
+      <button class="scroll-control" type="button" data-scroll-control="top" aria-label="回到顶部" title="回到顶部">
+        <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+      </button>
+      <button class="scroll-control" type="button" data-scroll-control="down" aria-label="到底部" title="到底部">
+        <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+      </button>
+    </nav>
+    <script>
+      // Mobile nav toggle
+      (function () {
+        var toggle = document.querySelector('.nav-toggle') as HTMLElement | null;
+        var nav = document.querySelector('.site-nav') as HTMLElement | null;
+        if (!toggle || !nav) return;
+
+        toggle.addEventListener('click', function () {
+          var expanded = toggle!.getAttribute('aria-expanded') === 'true';
+          toggle!.setAttribute('aria-expanded', String(!expanded));
+          nav!.classList.toggle('open');
+        });
+
+        nav.addEventListener('click', function (e) {
+          var target = e.target as Element | null;
+          if (target && target.classList.contains('nav-link')) {
+            toggle!.setAttribute('aria-expanded', 'false');
+            nav!.classList.remove('open');
+          }
+        });
+      })();
+
+      // TOC scroll tracking
+      (function () {
+        var tocLinks = document.querySelectorAll('.toc a');
+        if (!tocLinks.length) return;
+
+        var headings = document.querySelectorAll(
+          '.post-content h1[id], .post-content h2[id], .post-content h3[id], .post-content h4[id]'
+        );
+        if (!headings.length) return;
+
+        function setActive(id: string) {
+          tocLinks.forEach(function (link) {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + id) {
+              link.classList.add('active');
+            }
+          });
+        }
+
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                var id = entry.target.getAttribute('id');
+                if (id) setActive(id);
+              }
+            });
+          },
+          { rootMargin: '-80px 0px -75% 0px' }
+        );
+
+        headings.forEach(function (heading) {
+          observer.observe(heading);
+        });
+      })();
+
+      // Theme toggle
+      (function () {
+        var STORAGE_KEY = 'warmpaper-theme';
+        var btn = document.querySelector('.theme-toggle') as HTMLElement | null;
+        if (!btn) return;
+
+        var mql = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function currentTheme() {
+          try {
+            var saved = localStorage.getItem(STORAGE_KEY);
+            if (saved === 'light' || saved === 'dark') return saved;
+          } catch (e) {}
+          return mql.matches ? 'dark' : 'light';
+        }
+
+        function syncIcon() {
+          btn!.setAttribute('data-theme-state', currentTheme());
+        }
+
+        btn.addEventListener('click', function () {
+          var next = currentTheme() === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          try { localStorage.setItem(STORAGE_KEY, next); } catch (e) {}
+          btn!.setAttribute('data-theme-state', next);
+        });
+
+        mql.addEventListener('change', function () {
+          var hasManual = false;
+          try { hasManual = !!localStorage.getItem(STORAGE_KEY); } catch (e) {}
+          if (!hasManual) syncIcon();
+        });
+
+        syncIcon();
+      })();
+
+      // Floating scroll controls
+      (function () {
+        var topButton = document.querySelector('[data-scroll-control="top"]') as HTMLButtonElement | null;
+        var downButton = document.querySelector('[data-scroll-control="down"]') as HTMLButtonElement | null;
+        if (!topButton || !downButton) return;
+
+        var comments = document.querySelector('.comments-section') as HTMLElement | null;
+        if (comments) {
+          downButton.setAttribute('aria-label', '去评论区');
+          downButton.setAttribute('title', '去评论区');
+          var downIcon = downButton.querySelector('i');
+          if (downIcon) downIcon.className = 'fa-solid fa-comment-dots';
+        }
+
+        topButton.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        downButton.addEventListener('click', function () {
+          if (comments) {
+            comments.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+          }
+
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

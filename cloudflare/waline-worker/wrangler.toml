@@ -1,0 +1,27 @@
+name = "warmpaper-waline"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+workers_dev = true
+
+[[routes]]
+pattern = "waline.ficor.cc"
+custom_domain = true
+
+[[routes]]
+pattern = "waline2.ficor.cc"
+custom_domain = true
+
+[[routes]]
+pattern = "waline2.ficor.net"
+custom_domain = true
+
+[vars]
+SITE_URL = "https://ficor.net"
+ADMIN_NICK = "Ficor"
+ADMIN_EMAIL = "ficor@qq.com"
+ADMIN_URL = "https://ficor.net"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "warmpaper-waline"
+database_id = "eec70a9a-986c-45ad-bb98-53175d464240"

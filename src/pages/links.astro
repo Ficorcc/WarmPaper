@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DEFAULT_CONFIG } from '../config';
+
+const config = DEFAULT_CONFIG;
+const links = config.links || [];
+
+function getAvatar(avatar: string | undefined, name: string): string {
+  if (!avatar || avatar.trim() === '') {
+    return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=random&size=48';
+  }
+  return avatar;
+}
+---
+
+<BaseLayout config={config} title="友链">
+  <div class="page-content">
+    <h1>友链</h1>
+    
+    <p class="links-intro">一些常去的网站和朋友们的小窝。</p>
+
+    <div class="links-grid">
+      {links.map((link) => {
+        const avatarUrl = getAvatar(link.avatar, link.name);
+        return (
+          <a class="links-card" href={link.url} target="_blank" rel="noopener">
+            <div class="links-card-avatar">
+              <img src={avatarUrl} alt={link.name} />
+            </div>
+            <div class="links-card-info">
+              <strong>{link.name}</strong>
+              {link.description && <span>{link.description}</span>}
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>

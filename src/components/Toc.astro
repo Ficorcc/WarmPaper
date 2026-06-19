@@ -1,0 +1,38 @@
+---
+interface TocItem {
+  depth: number;
+  slug: string;
+  text: string;
+  children?: TocItem[];
+}
+
+interface Props {
+  toc: TocItem[];
+}
+
+const { toc } = Astro.props;
+
+function renderToc(items: TocItem[]): string {
+  let html = '<ol>';
+  for (const item of items) {
+    html += `<li><a href="#${item.slug}">${item.text}</a>`;
+    if (item.children && item.children.length > 0) {
+      html += renderToc(item.children);
+    }
+    html += '</li>';
+  }
+  html += '</ol>';
+  return html;
+}
+---
+
+{toc.length > 0 && (
+  <aside class="toc-sidebar">
+    <div class="toc-wrapper">
+      <h3 class="toc-title">Table of Contents</h3>
+      <nav class="toc" aria-label="Table of contents">
+        <Fragment set:html={renderToc(toc)} />
+      </nav>
+    </div>
+  </aside>
+)}

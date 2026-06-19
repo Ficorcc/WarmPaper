@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { DEFAULT_CONFIG } from '../config';
+
+const config = DEFAULT_CONFIG;
+const allPosts = await getCollection('posts');
+
+const tagMap: Record<string, number> = {};
+for (const post of allPosts) {
+  if (post.data.tags) {
+    for (const tag of post.data.tags) {
+      tagMap[tag] = (tagMap[tag] || 0) + 1;
+    }
+  }
+}
+
+const tags = Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
+---
+
+<BaseLayout config={config} title="标签">
+  <div class="page-content">
+    <h1>标签</h1>
+    {tags.length > 0 ? (
+      <div class="tag-cloud">
+        {tags.map(([tag, count]) => (
+          <a class="tag-cloud-item" href={`/tags/${tag}`}>
+            {tag}
+            <span class="tag-cloud-count">{count}</span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p class="no-data">暂无标签</p>
+    )}
+  </div>
+</BaseLayout>

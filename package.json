@@ -1,0 +1,27 @@
+{
+  "name": "astro-theme-warmpaper",
+  "version": "0.1.0",
+  "description": "A warm, Claude-inspired blog theme with graph paper background for Astro",
+  "keywords": [
+    "astro-theme",
+    "blog"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/finch-xu/hexo-theme-warmpaper"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "astro": "^5.18.2",
+    "typescript": "^5.7.2"
+  }
+}

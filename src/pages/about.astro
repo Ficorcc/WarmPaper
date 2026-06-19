@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { DEFAULT_CONFIG } from '../config';
+
+const config = DEFAULT_CONFIG;
+const aboutEntry = (await getCollection('pages')).find((page) => page.id === 'about.md');
+const { Content } = await aboutEntry!.render();
+---
+
+<BaseLayout config={config} title={aboutEntry?.data.title || 'About'}>
+  <article class="page-content">
+    <h1>{aboutEntry?.data.title || 'About'}</h1>
+    <div class="post-content">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
