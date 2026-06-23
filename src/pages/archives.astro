@@ -42,7 +42,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
               {formatDate(post.data.pubDate).substring(5)}
             </span>
             <span class="archive-post-title">
-              <a href={`/posts/${post.slug}`}>{post.data.title || '(Untitled)'}</a>
+              <a href={`/posts/${post.id}`}>{post.data.title || '(Untitled)'}</a>
             </span>
           </div>
         ))}

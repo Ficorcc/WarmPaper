@@ -2,13 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Toc from '../../components/Toc.astro';
 import WalineComments from '../../components/WalineComments.astro';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { DEFAULT_CONFIG } from '../../config';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
   return posts.map((post) => ({
-    params: { slug: post.slug },
+    params: { slug: post.id },
     props: { post },
   }));
 }
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await post.render();
+const { Content, headings } = await render(post);
 const config = DEFAULT_CONFIG;
 
 function formatDate(date: Date): string {
@@ -35,7 +35,7 @@ const toc = headings
 
 const allPosts = await getCollection('posts');
 const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const currentIndex = sortedPosts.findIndex((p) => p.slug === post.slug);
+const currentIndex = sortedPosts.findIndex((p) => p.id === post.id);
 const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
 ---
@@ -87,13 +87,13 @@ const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentInde
       </div>
       <nav class="post-nav">
         {prevPost && (
-          <a class="prev" href={`/posts/${prevPost.slug}`}>
+          <a class="prev" href={`/posts/${prevPost.id}`}>
             <span class="post-nav-label">上一篇</span>
             <span class="post-nav-title">{prevPost.data.title}</span>
           </a>
         )}
         {nextPost && (
-          <a class="next" href={`/posts/${nextPost.slug}`}>
+          <a class="next" href={`/posts/${nextPost.id}`}>
             <span class="post-nav-label">下一篇</span>
             <span class="post-nav-title">{nextPost.data.title}</span>
           </a>
